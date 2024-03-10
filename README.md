@@ -4,7 +4,7 @@ This repository contains the experimental source code to reproduce the numerical
 
 * K. Bredies, J. Chirinos Rodriguez, E. Naldi. Learning Firmly Nonexpansive Operators. In preparation.
 
-
+The file "Train_with_ADMM" serves to train the operator and "Denoising_BUTTERFLY" and "Denoising_CIRCLES" perform the experiments in Section 4.5.
 
 
 
