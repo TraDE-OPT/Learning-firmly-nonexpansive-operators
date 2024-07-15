@@ -28,7 +28,7 @@ input = double(input);
 
 N = size(input,1); NN = N^2;
 real_input = reshape(input,NN,1); %Clean image
-delta = 10;
+delta = 30;
 input=real_input+delta*randn(NN,1); input=max(min(input,255),0); %Dirty image
 %input = MRI image "dirty"
 figure(5); clf; %% HERE! (clf;)%%
@@ -49,10 +49,10 @@ D = [D1;D2];
 %% CP 1: Denoising using the learned prox with the Butterflies dataset
 load Learned_Operators\FINAL_ButterfliesTrain_Sigma10_1000pts.mat
 Points = T.X; Q = Polyhedron('V', Points(T.convexHull,:));
-l1 = 5; l2 = 0.3; % delta = 30: l1 = 25; l2 = 0.55; delta = 20: l1 = 10; l2 = 0.4; delta = 10: l1 = 5; l2 = 0.3; 
+l1 = 25; l2 = 0.55; % delta = 30: l1 = 25; l2 = 0.55; delta = 20: l1 = 10; l2 = 0.4; delta = 10: l1 = 5; l2 = 0.3; 
 maxit = 1000; tol = 10^-2;
 % for_conv=1/100; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
-s = 2; %% delta = 30: s = 4.5; delta = 20: s = 3; delta = 10: s = 2;
+s = 4.5; %% delta = 30: s = 4.5; delta = 20: s = 3; delta = 10: s = 2;
 for_conv=1; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
 s = s*for_conv; % the higher the s, the higher the parameter in front of the regularizer
 t = 1/(s*8);
@@ -97,7 +97,7 @@ load Learned_Operators\FINAL_MNIST_train_Sigma10_1000pts.mat
 Points = T.X; Q = Polyhedron('V', Points(T.convexHull,:));
 maxit = 1000; tol = 10^-2;
 % for_conv=1/100; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
-s = 4; %% delta = 30: s = 7; delta = 20: s = 6; delta = 10: s = 4;
+s = 7; %% delta = 30: s = 7; delta = 20: s = 6; delta = 10: s = 4;
 for_conv = 1; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
 s = s*for_conv; % the higher the s, the higher the parameter in front of the regularizer
 t = 1/(s*8);
@@ -188,6 +188,9 @@ subplot(2,3,3); image(reshape(x2norm,N,N)); hold on; title('H1')
 subplot(2,3,4); image(double(reshape(x21norm,N,N))); hold on; title('TV')
 subplot(2,3,5); image(ok1); hold on; title('Learned 1 (butterfly)');
 subplot(2,3,6); image(ok2); hold on; title('Learned 2 (MNIST)');
+set(gcf, 'PaperPosition', [0 0 30 15]); %Position plot at left hand corner with width 30 and height 15.
+set(gcf, 'PaperSize', [30 15]); %Set the paper to have width 30 and height 15.
+saveas(gcf, 'Circles', 'pdf') %Save figure
 figure(6); clf; semilogy(residualx(1:k_max)); hold on; semilogy(residualy(1:k_max)); title('Residuals'); legend('Primal','Dual');
 set(gcf, 'PaperPosition', [0 0 30 15]); %Position plot at left hand corner with width 5 and height 5.
 set(gcf, 'PaperSize', [30 15]); %Set the paper to have width 5 and height 5.

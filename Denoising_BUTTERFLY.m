@@ -132,7 +132,10 @@ subplot(max_iim,5,(iim-1)*5+1); image(reshape(real_input,N,N)); hold on; title('
 subplot(max_iim,5,(iim-1)*5+2); image(reshape(input,N,N)); hold on; title('Noisy image')
 subplot(max_iim,5,(iim-1)*5+3); image(reshape(x2norm,N,N)); hold on; title('H1')
 subplot(max_iim,5,(iim-1)*5+4); image(double(reshape(x21norm,N,N))); hold on; title('TV')
-subplot(max_iim,5,(iim-1)*5+5); image(ok); hold on; title('Learned prox');
+subplot(max_iim,5,(iim-1)*5+5); image(ok); hold on; title('Learned');
+set(gcf, 'PaperPosition', [0 0 30 15]); %Position plot at left hand corner with width 30 and height 15.
+set(gcf, 'PaperSize', [30 15]); %Set the paper to have width 30 and height 15.
+saveas(gcf, 'Butterflies', 'pdf') %Save figure
 
 %% Print values for the table
 fprintf('Ready to copy: MSE & $ %f $ & $ %f $ & $ %f $ & $ mathbf{%f} $ \n',norm(double(real_input-input)),norm(double(real_input-x2norm)),norm(double(real_input-x21norm)),norm(double(real_input-xsol)))
