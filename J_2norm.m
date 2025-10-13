@@ -1,8 +1,12 @@
-function [y] = J_2norm(par,x)
+function y = J_2norm(par, x)
 
-% Compute the prox of the 2-norm
+% Compute the prox of par*||x||_2
 
-y = max(norm(x)-par,0)*x/norm(x);
-
+n = norm(x);
+if n <= eps
+    y = zeros(size(x));
+else
+    scale = max(1 - par/n, 0);
+    y = scale * x;
 end
-
+end

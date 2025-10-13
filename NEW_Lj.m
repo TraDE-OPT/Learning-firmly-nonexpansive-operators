@@ -7,7 +7,6 @@ for i = T(j,2:end)
     OUT = [OUT,Z(:,i)-Z(:,T(j,1))];
 end    
 
-OUT = OUT*inv(At);
+OUT = OUT / At; % OUT = OUT*inv(At);
 
 end
-

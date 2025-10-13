@@ -2,7 +2,7 @@ function [XX,YYbar] = Clustering(X,Ybar,K)
 
 % Clustering using k-means
 
-[~, C] = kmeans(X, K);
+[~, C] = local_kmeans(X, K);
 
 for i = 1:K
     [~,j] = min(pdist2(C(i,:),X));

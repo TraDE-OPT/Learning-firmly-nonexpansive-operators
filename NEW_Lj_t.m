@@ -2,7 +2,7 @@ function [OUT] = NEW_Lj_t(T,At,j,U,n,d)
 
 % Compute the transpose of the linear operator L_j
 
-U = U*inv(At)';
+U = U / At'; % U = U*inv(At)';
 
 OUT = zeros(d,n);
 c = 1;

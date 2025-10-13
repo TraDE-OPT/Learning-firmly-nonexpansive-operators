@@ -1,31 +1,38 @@
-function [y] = Op_T(x,A,B,T,X,Zsol,Points)
+% DEMOPROJECTPOINT.M
+% Demonstration of projecting a point y onto the convex hull of a set of points P in 2D.
 
-% x is a point in the plane in R^2
-% A(:,:,j) and B(:,:,j) are Aj, Bj (A,B \in R^(d x d x J), where J number of triangles)
-% T is the triangulation
-% X data points in R^2n
-% Zsol are the solution output relative to X
+% 1) Define some 2D points P
+%    (Here we just generate random points for demonstration.)
+P = [rand(10,1)*5, rand(10,1)*5];  % 10 random points in a 5x5 region
+P = Points;
 
-J = size(T,1);
+% 2) Define a query point y (pick something that might be outside the hull)
+y = [2.5, 5.5];  % For instance, a point potentially above most of the data
 
-j = pointLocation(T,x'); 
-% If the point is not in the triangulation, project into it
-while ~(j<=J)
-    if randi(100) == 1
-        % fprintf('projecting...\n');
-    end
-    % fprintf('projecting...\n');
-    x = projectPointOnto2DHull(Points,x');
-    j = pointLocation(T,x);
-    x = x';
-end
+% 3) Compute the closest point 'cp' in conv(P) to y
+cp = projectPointOnto2DHull(P, y);
 
-z = B(:,:,j)/A(:,:,j)*(x-X(:,T(j,1))) + Zsol(:,T(j,1));
+% 4) Plot everything
+figure; hold on; grid on; axis equal;
 
-y = 1/2*z + 1/2*x; % FNE
-% y = x - z; % GSD
+% Plot the original points
+plot(P(:,1), P(:,2), 'bo', 'MarkerFaceColor','b', 'DisplayName','Points P');
 
-end
+% Plot the query point y
+plot(y(1), y(2), 'rx', 'MarkerSize',10, 'LineWidth',2, 'DisplayName','Query point y');
+
+% Plot the convex hull (polygon) by connecting hull vertices
+hullIdx = convhull(P(:,1), P(:,2));
+plot(P(hullIdx,1), P(hullIdx,2), 'g-', 'LineWidth',2, 'DisplayName','Convex Hull');
+
+% Plot the closest point cp
+plot(cp(1), cp(2), 'ms', 'MarkerSize',8, 'LineWidth',2, 'DisplayName','Projection cp');
+
+title('Demo: Project y onto the Convex Hull of P');
+legend('Location','best');
+hold off;
+
+
 
 function closestPoint = projectPointOnto2DHull(P, y)
 % PROJECTPOINTONTO2DHULL Returns the closest point in the 2D convex hull of P to y.
@@ -58,7 +65,7 @@ end
 
 % -------------------------------------------------------------------------
 function cp = projectPointOntoPolygon(hullPoints, y)
-% Returns the closest point from y to a polygon
+% PROJECTPOINTONTOPOLYGON Returns the closest point from y to a polygon
 % specified by 'hullPoints' in cyclic order. The polygon is assumed convex
 % (in practice, hullPoints is the output of convhull).
 
@@ -85,7 +92,7 @@ end
 
 % -------------------------------------------------------------------------
 function [closestPt, dist] = pointSegmentDistance(p1, p2, y)
-% Returns the closest point on the segment [p1,p2] to y
+% POINTSEGMENTDISTANCE Returns the closest point on the segment [p1,p2] to y
 % and also the Euclidean distance.
 
     v = p2 - p1;    % Vector along the segment

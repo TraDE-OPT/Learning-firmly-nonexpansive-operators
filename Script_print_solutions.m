@@ -1,12 +1,16 @@
 LW = 3; font = 20; % Linewidth and fontsize
 
-figure(1); clf; semilogy(out1,'LineWidth',LW); hold on; title('Non-Lipschitz'); set(gca,'fontsize',font)
-figure(2); clf; semilogy(res,'LineWidth',LW); hold on;  title('Residuals'); set(gca,'fontsize',font)
+figure(1); clf; plot(out1,'LineWidth',LW); hold on; title('Non-Lipschitz'); set(gca,'fontsize',font)
+figure(2); clf; semilogy(out2,'LineWidth',LW); hold on;  title('Least squares'); set(gca,'fontsize',font)
+figure(3); clf; semilogy(res,'LineWidth',LW); hold on;  title('Residuals'); set(gca,'fontsize',font)
 
 Zsol = Z;
 Ysol = 1/2*X + 1/2*Zsol; % We search for firmly nonexpansive operators
+% Ysol = X - Zsol; % If we search for gradient step denoiser
 
-figure(3); clf;
+% Ybar = 1/2*X + 1/2*Zbar;
+
+figure(4); clf;
 subplot(3,1,1); scatter(X(1,:),X(2,:),'k'); hold on;
 subplot(3,1,2); scatter(Ybar(1,:),Ybar(2,:),'b'); hold on;
 subplot(3,1,3); scatter(Ysol(1,:),Ysol(2,:),'r'); hold on;
@@ -20,7 +24,7 @@ for j=1:J
     B(:,:,j) = M;
 end
 
-figure(4); clf;
+figure(5); clf;
 subplot(2,1,1); quiver(X(1,:),X(2,:),Ybar(1,:)-X(1,:),Ybar(2,:)-X(2,:)); hold on;
 subplot(2,1,2); quiver(X(1,:),X(2,:),Ysol(1,:)-X(1,:),Ysol(2,:)-X(2,:)); hold on;
 

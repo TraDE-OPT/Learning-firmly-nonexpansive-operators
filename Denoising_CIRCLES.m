@@ -1,14 +1,16 @@
-%We have everything we need for computing T
-clear all;
+% clear all;
 rng(1)
 LW = 3; font = 20; % Linewidth and fontsize
 
 %% Load
-tbxmanager restorepath
-load('Learned_Operators\FINAL_ButterfliesTrain_Sigma10_1000pts.mat')
+load('Learned_Operators\INCREASING_BFLY_Sigma10_2000pts.mat')
 
-%% Define Q
-Points = T.X; Q = Polyhedron('V', Points(T.convexHull,:)); 
+% delta = 10; l1 = 9.8; l2 = 0.35; s1 = 1.1; s2 = 1.45;
+% delta = 20; l1 = 18.7; l2 = 0.82; s1 = 2; s2 = 2.8;
+delta = 30; l1 = 29.2; l2 = 1.4; s1 = 3.2; s2 = 4.25;
+
+%% Define Points
+Points = T.X;
 
 % input=imread('0.jpg');
 % input=imread('starfish.png'); input=input(:,:,1);
@@ -28,7 +30,6 @@ input = double(input);
 
 N = size(input,1); NN = N^2;
 real_input = reshape(input,NN,1); %Clean image
-delta = 30;
 input=real_input+delta*randn(NN,1); input=max(min(input,255),0); %Dirty image
 %input = MRI image "dirty"
 figure(5); clf; %% HERE! (clf;)%%
@@ -46,13 +47,12 @@ end
 D = [D1;D2];
 [d2,d1] = size(D);
 
+
 %% CP 1: Denoising using the learned prox with the Butterflies dataset
-load Learned_Operators\FINAL_ButterfliesTrain_Sigma10_1000pts.mat
-Points = T.X; Q = Polyhedron('V', Points(T.convexHull,:));
-l1 = 25; l2 = 0.55; % delta = 30: l1 = 25; l2 = 0.55; delta = 20: l1 = 10; l2 = 0.4; delta = 10: l1 = 5; l2 = 0.3; 
+load('Learned_Operators\INCREASING_BFLY_Sigma10_2000pts.mat')
+Points = T.X;
 maxit = 1000; tol = 10^-2;
-% for_conv=1/100; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
-s = 4.5; %% delta = 30: s = 4.5; delta = 20: s = 3; delta = 10: s = 2;
+s = s1;
 for_conv=1; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
 s = s*for_conv; % the higher the s, the higher the parameter in front of the regularizer
 t = 1/(s*8);
@@ -70,7 +70,7 @@ while k < maxit && tol < err
     % temp(kk,:) is a vector in R2
     yold = y;
     for kk = 1:size(tempo,1) %in order to use parfor you have to use the command "parpool("threads");" first
-        tempy(:,kk) = tempo(kk,:)'-s*Op_T(tempo(kk,:)'/s,A,B,T,X,Zsol,Q); %this is the prox of gi^*, which is id - prox_gi
+        tempy(:,kk) = tempo(kk,:)'-s*Op_T(tempo(kk,:)'/s,A,B,T,X,Zsol,Points); %this is the prox of gi^*, which is id - prox_gi
     end
     y1 = tempy(1,:)'; y2 = tempy(2,:)';
     y = [y1;y2];
@@ -93,11 +93,11 @@ err
 toc
 
 %% CP 2: Denoising using the learned prox with the MNIST dataset
-load Learned_Operators\FINAL_MNIST_train_Sigma10_1000pts.mat
-Points = T.X; Q = Polyhedron('V', Points(T.convexHull,:));
+load('Learned_Operators\INCREASING_MNIST_Sigma10_2000pts.mat')
+Points = T.X;
 maxit = 1000; tol = 10^-2;
 % for_conv=1/100; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
-s = 7; %% delta = 30: s = 7; delta = 20: s = 6; delta = 10: s = 4;
+s = s2;
 for_conv = 1; % Parameter that can be adjusted to improve convergence speed (puts a constant in front of the problem...)
 s = s*for_conv; % the higher the s, the higher the parameter in front of the regularizer
 t = 1/(s*8);
@@ -115,7 +115,7 @@ while k<maxit && tol<err
     % temp(kk,:) is a vector in R2
     yold=y;
     for kk=1:size(tempo,1) % in order to use parfor you have to use the command "parpool("threads");" first
-        tempy(:,kk)=tempo(kk,:)'-s*Op_T(tempo(kk,:)'/s,A,B,T,X,Zsol,Q); % this is the prox of gi^*, which is id - prox_gi
+        tempy(:,kk)=tempo(kk,:)'-s*Op_T(tempo(kk,:)'/s,A,B,T,X,Zsol,Points); % this is the prox of gi^*, which is id - prox_gi
     end
     y1=tempy(1,:)'; y2=tempy(2,:)';
     y=[y1;y2];
@@ -139,6 +139,7 @@ toc
 
 %% CP for iso TV
 x = ones(size(D,2),1); y = ones(size(D,1),1);
+s = 1; t = 1/(s*8);
 residuals = zeros(maxit,1);
 k = 0; err = 2*tol;
 tic;
@@ -161,8 +162,9 @@ x21norm = uint8(x);
 err
 toc
 
-%% CP for 2-norm
+%% CP for 2-norm squared
 x = zeros(size(D,2),1); y = zeros(size(D,1),1);
+s = 1; t = 1/(s*8);
 residuals = zeros(maxit,1);
 k = 0; err = 2*tol;
 while k < maxit && tol < err
@@ -171,7 +173,7 @@ while k < maxit && tol < err
     x = (tempx+t*input)/(1+t); %Prox of square loss
     temp = y+s*D*(2*x-xold);
     yold = y; 
-    y = l2*temp; %Prox dual of the 2norm square (the higher the parameter the higher the contribution) %% 0.6
+    y = (l2/(l2+s))*temp; %Prox dual of the 2norm square (the higher the parameter the higher the contribution) %% 0.6
     k = k+1;
     err = norm(x-xold)+norm(y-yold);
 end
